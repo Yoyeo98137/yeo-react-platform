@@ -15,7 +15,7 @@
   }
 }
 
-.App-header {
+.App-main {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
@@ -37,4 +37,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.mt12 {
+  margin-top: 12px;
 }
