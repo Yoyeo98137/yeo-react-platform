@@ -1,8 +1,14 @@
-import React, { FC, PropsWithChildren, useEffect, useState } from "react";
-import type { NodeData } from "./node";
-import Node from "./node";
-import Store, { flatNodes } from "./store";
-import "./index.css";
+import React, {
+  FC,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import type { NodeData } from './node';
+import Node from './node';
+import Store, { flatNodes } from './store';
+import './index.css';
 
 type Nullable<T> = T | null;
 
@@ -10,14 +16,14 @@ interface NodeProps extends Node {
   // 避免 children 重名
   slotLabel?: React.ReactNode;
 }
-const CascaderNode: FC<Omit<NodeProps, "isLeaf" | "doCheck">> = ({
+const CascaderNode: FC<Omit<NodeProps, 'isLeaf' | 'doCheck'>> = ({
   checked,
   slotLabel,
 }) => {
   // https://zh-hans.reactjs.org/docs/faq-styling.html#how-do-i-add-css-classes-to-components
-  let className = "y-node-content";
+  let className = 'y-node-content';
   if (checked) {
-    className += " is-active";
+    className += ' is-active';
   }
 
   return <div className={className}>{slotLabel}</div>;
@@ -39,16 +45,24 @@ interface CasaderProps {
 const Casader: FC<CasaderProps> = (props) => {
   const { options = [] } = props;
   const [menus, setMenus] = useState<Node[][]>([]);
-  const menuList = new Store(options);
+  // const menuList = new Store(options);
+  const menuList = useMemo(() => new Store(options), [options]);
 
   useEffect(() => {
-    setMenus([...menus, [...menuList.getNodes()]]);
+    console.log('🏄 # Casader # menuList # useEffect');
+
+    setMenus(() => [[...menuList.getNodes()]]);
+    // setMenus([...menus, [...menuList.getNodes()]]);
     // console.log("🏄 ---- useEffect ---- menus", menus);
-  }, [options]);
+
+    // menuList 更新即执行，在这里只会执行两次（开发环境，两次 render）
+  }, [menuList]);
 
   useEffect(() => {
-    console.log("🏄 ---- useEffect ---- menus", menus);
-  }, [menus]);
+    console.log('🏄 # Casader # useEffect');
+    // 每次 render 都会执行
+    // 初始化的时候会执行三次：两次 render + 一次 setMenus
+  });
 
   // ---------------- Node
 
@@ -60,7 +74,7 @@ const Casader: FC<CasaderProps> = (props) => {
     const newMenus = menus.slice(0, node.level);
 
     if (expandingNode?.id !== node.id) {
-      console.log("---- 展开节点了", node);
+      console.log('---- 展开节点了', node);
 
       newMenus.push(node.children);
       setExpandingNode(node);
@@ -72,7 +86,7 @@ const Casader: FC<CasaderProps> = (props) => {
   const checkNode = (node: Node, checked = false) => {
     const oldNode = checkedNodes[0];
     oldNode?.doCheck(false);
-    console.log("🏄 ---- checkNode ---- oldNode", oldNode);
+    console.log('🏄 ---- checkNode ---- oldNode', oldNode);
 
     // 因为 JS 对象的性质，必须要想办法去触发地址的更改，才能让组件 rerender
     const copyMenus = [...menus];
